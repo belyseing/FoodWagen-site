@@ -1,14 +1,15 @@
-import Hero from "@/components/Hero"
-import FoodCard from "@/components/FoodCard"
+import Hero from "@/components/Hero";
+import FeaturedMeals from "@/components/FeaturedMeals";
+
 
 function page() {
   return (
-    <div>
+    <>
       <Hero/>
-      <FoodCard />
-    </div>
+      <FeaturedMeals/>
+    </>
   )
 }
 
-export default page
+export default page;
 

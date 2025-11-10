@@ -16,11 +16,9 @@ function Header() {
             <span className="text-[#FFB30E]">Wagen</span>
           </span>
         </div>
-
-
-      <button className="px-6 py-2 rounded-[14px] bg-linear-to-r from-[#FFB30E] to-[#eca712] text-white text-sm font-bold shadow-xl shadow-orange-100">
-      Add Meal
-      </button>
+        <button className="px-6 py-2 rounded-[14px] bg-linear-to-r from-[#FFB30E] to-[#eca712] text-white text-sm font-bold shadow-xl shadow-orange-100">
+          Add Meal
+        </button>
 
       </div>
     </header>

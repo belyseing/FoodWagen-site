@@ -15,12 +15,12 @@ export default function Hero() {
         </div>
       </div>
       
-      <div className="absolute right-0 bottom-0">
+      <div className="absolute right-20 -bottom-9 ">
         <Image
-          src="/images/plate.png"
+          src="/images/plate2.png"
           alt="hero image"
-          width={604}
-          height={505}
+          width={390}
+          height={300}
           className="object-contain"
         />
       </div>
