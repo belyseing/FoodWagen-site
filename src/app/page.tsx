@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
-import FeaturedMeals from "@/components/FeaturedMeals";
+import { FeaturedMeals } from "@/components/FeaturedMeals";
+
 
 
 function page() {
