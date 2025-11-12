@@ -2,21 +2,23 @@
 
 import type React from "react"
 import { useState } from "react"
+import type { Meal } from "@/types/meal"
 
 interface AddMealModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: any) => void 
+  onSubmit: (data: Meal) => void
 }
 
-export function AddMealModal({ isOpen, onClose, onSubmit }: AddMealModalProps) { 
+export function AddMealModal({ isOpen, onClose, onSubmit }: AddMealModalProps) {
   const [formData, setFormData] = useState({
     foodName: "",
     foodRating: "",
     foodImage: "",
     restaurantName: "",
     restaurantLogo: "",
-    restaurantStatus: "open",
+    restaurantStatus: "Open",
+    price: "",
   })
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
@@ -26,7 +28,7 @@ export function AddMealModal({ isOpen, onClose, onSubmit }: AddMealModalProps) {
       ...prev,
       [name]: value,
     }))
-    
+
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -42,35 +44,40 @@ export function AddMealModal({ isOpen, onClose, onSubmit }: AddMealModalProps) {
     if (!formData.foodName.trim()) {
       newErrors.foodName = "Food name is required"
     }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      newErrors.price = "Valid price is required"
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
     }
 
-const mealData = {
-  name: formData.foodName,
-  rating: parseFloat(formData.foodRating) || 0,
-  image: formData.foodImage,
-  price: parseFloat(formData.price) || 0, 
-  restaurant: {
-    name: formData.restaurantName,
-    logo: formData.restaurantLogo,
-    status: formData.restaurantStatus,
-  }
-}
-    console.log("Submitting meal data:", mealData) 
-    
+    const mealData: Meal = {
+      id: "",
+      name: formData.foodName,
+      rating: parseFloat(formData.foodRating) || 0,
+      image: formData.foodImage,
+      price: parseFloat(formData.price) || 0,
+      restaurant: {
+        name: formData.restaurantName,
+        logo: formData.restaurantLogo,
+        status: formData.restaurantStatus as "Open" | "Closed",
+      },
+    }
+
+    console.log("Form submitting meal data:", mealData)
+
     onSubmit(mealData)
 
-  
     setFormData({
       foodName: "",
       foodRating: "",
       foodImage: "",
       restaurantName: "",
       restaurantLogo: "",
-      restaurantStatus: "open",
+      restaurantStatus: "Open",
+      price: "",
     })
   }
 
@@ -95,11 +102,26 @@ const mealData = {
             {errors.foodName && <p className="text-red-500 text-sm mt-1">{errors.foodName}</p>}
           </div>
 
+          {/* Price */}
+          <div>
+            <input
+              type="number"
+              name="price"
+              placeholder="Price"
+              value={formData.price}
+              onChange={handleChange}
+              step="0.01"
+              min="0"
+              className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+          </div>
+
           {/* Food Rating */}
           <input
             type="number"
             name="foodRating"
-            placeholder="Food rating"
+            placeholder="Food rating (0-5)"
             value={formData.foodRating}
             onChange={handleChange}
             step="0.1"
@@ -108,7 +130,7 @@ const mealData = {
             className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
 
-          
+          {/* Food Image */}
           <input
             type="url"
             name="foodImage"
@@ -128,7 +150,7 @@ const mealData = {
             className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
 
-        
+          {/* Restaurant Logo Link */}
           <input
             type="url"
             name="restaurantLogo"
@@ -138,15 +160,15 @@ const mealData = {
             className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
 
-          
+          {/* Restaurant Status */}
           <select
             name="restaurantStatus"
             value={formData.restaurantStatus}
             onChange={handleChange}
             className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-700"
           >
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
+            <option value="Open">Open</option>
+            <option value="Closed">Closed</option>
           </select>
 
           {/* Buttons */}
@@ -170,3 +192,4 @@ const mealData = {
     </div>
   )
 }
+

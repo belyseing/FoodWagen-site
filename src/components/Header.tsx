@@ -4,7 +4,8 @@ import { useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { FoodFormModal } from "./food-form-modal"
-import { createFood, type Food } from "@/lib/api/foods"
+import { createFood } from "@/lib/api/foods"
+import type { Meal } from "@/types/meal"
 
 
 export function Header() {
@@ -12,7 +13,7 @@ export function Header() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const handleAddMeal = async (data: Food) => {
+  const handleAddMeal = async (data: Meal) => {
     setIsLoading(true)
     try {
       await createFood(data)

@@ -1,14 +1,14 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import  type { Food } from "@/lib/api/foods"
+import type { Meal } from "@/types/meal"
 
 
 interface FoodFormModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: Food) => Promise<void>
-  initialData?: Food
+  onSubmit: (data: Meal) => Promise<void>
+  initialData?: Meal
   title: string
   submitLabel: string
   isLoading?: boolean
@@ -23,12 +23,14 @@ export function FoodFormModal({
   submitLabel,
   isLoading = false,
 }: FoodFormModalProps) {
-  const [formData, setFormData] = useState<Food>(() => ({
+  const [formData, setFormData] = useState<Meal>(() => ({
+    id: initialData?.id ?? "",
     name: initialData?.name ?? "",
-    price: initialData?.price ?? "",
+    price: initialData?.price ?? 0,
     image: initialData?.image ?? "",
     rating: initialData?.rating ?? 0,
     restaurant: {
+      name: initialData?.restaurant?.name ?? "",
       logo: initialData?.restaurant?.logo ?? "",
       status: initialData?.restaurant?.status ?? "Open",
     },
@@ -41,11 +43,13 @@ export function FoodFormModal({
   useEffect(() => {
     if (isOpen) {
       setFormData({
+        id: initialData?.id ?? "",
         name: initialData?.name ?? "",
-        price: initialData?.price ?? "",
+        price: initialData?.price ?? 0,
         image: initialData?.image ?? "",
         rating: initialData?.rating ?? 0,
         restaurant: {
+          name: initialData?.restaurant?.name ?? "",
           logo: initialData?.restaurant?.logo ?? "",
           status: initialData?.restaurant?.status ?? "Open",
         },
@@ -58,9 +62,12 @@ export function FoodFormModal({
     const newErrors: Record<string, string> = {}
 
     if (!formData.name.trim()) newErrors["food_name"] = "Food name is required"
-    if (!formData.image.trim()) newErrors["food_image"] = "Food image (link) is required"
-    if (formData.rating < 1 || formData.rating > 5) newErrors["food_rating"] = "Food rating must be between 1 and 5"
-    if (!formData.restaurant.logo.trim()) newErrors["restaurant_logo"] = "Restaurant logo (link) is required"
+    if (!formData.image?.trim?.() || !formData.image) newErrors["food_image"] = "Food image (link) is required"
+    const rating = formData.rating ?? 0
+    if (rating < 1 || rating > 5) newErrors["food_rating"] = "Food rating must be between 1 and 5"
+    if (!formData.restaurant?.logo?.trim()) newErrors["restaurant_logo"] = "Restaurant logo (link) is required"
+    const price = formData.price ?? 0
+    if (!price || Number.isNaN(price) || price <= 0) newErrors["food_price"] = "Valid price is required"
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -70,12 +77,12 @@ export function FoodFormModal({
     const { name, value } = e.target
 
     if (name.startsWith("restaurant_")) {
-      const key = name.replace("restaurant_", "") as keyof Food["restaurant"]
       setFormData((prev) => ({
         ...prev,
         restaurant: {
-          ...prev.restaurant,
-          [key]: value,
+          name: prev.restaurant?.name ?? "",
+          logo: name === "restaurant_logo" ? value : prev.restaurant?.logo ?? "",
+          status: name === "restaurant_status" ? (value as "Open" | "Closed") : prev.restaurant?.status ?? "Open",
         },
       }))
     } else if (name === "food_rating") {
@@ -83,8 +90,13 @@ export function FoodFormModal({
         ...prev,
         rating: value ? Number.parseFloat(value) : 0,
       }))
+    } else if (name === "food_price") {
+      setFormData((prev) => ({
+        ...prev,
+        price: value ? Number.parseFloat(value) : 0,
+      }))
     } else {
-      const fieldName = name.replace("food_", "") as keyof Omit<Food, "restaurant">
+      const fieldName = name.replace("food_", "") as keyof Omit<Meal, "restaurant">
       setFormData((prev) => ({
         ...prev,
         [fieldName]: value,
@@ -109,11 +121,13 @@ export function FoodFormModal({
       await onSubmit(formData)
   
       setFormData({
+        id: "",
         name: "",
-        price: "",
+        price: 0,
         image: "",
         rating: 0,
         restaurant: {
+          name: "",
           logo: "",
           status: "Open",
         },
@@ -165,6 +179,23 @@ export function FoodFormModal({
             {errors["food_rating"] && <p className="text-red-500 text-sm mt-1">{errors["food_rating"]}</p>}
           </div>
 
+          {/* Food Price */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Food price</label>
+            <input
+              id="food_price"
+              type="number"
+              name="food_price"
+              placeholder="Food price"
+              value={formData.price ?? ""}
+              onChange={handleChange}
+              step="0.01"
+              min="0"
+              className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-700"
+            />
+            {errors["food_price"] && <p className="text-red-500 text-sm mt-1">{errors["food_price"]}</p>}
+          </div>
+
           {/* Food Image */}
           <div>
             <label className="block text-sm text-gray-600 mb-1">Food image (link)</label>
@@ -189,7 +220,7 @@ export function FoodFormModal({
               type="url"
               name="restaurant_logo"
               placeholder="Restaurant logo (link)"
-              value={formData.restaurant.logo}
+              value={formData.restaurant?.logo ?? ""}
               onChange={handleChange}
               className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-700"
             />
@@ -202,7 +233,7 @@ export function FoodFormModal({
             <select
               id="restaurant_status"
               name="restaurant_status"
-              value={formData.restaurant.status}
+              value={formData.restaurant?.status ?? "Open"}
               onChange={handleChange}
               className="w-full px-4 py-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-700"
             >
