@@ -3,17 +3,17 @@
 import { useState, useEffect } from "react"
 import { MealCard } from "./MealCard"
 import { FoodFormModal } from "./food-form-modal"
-import { createFood, updateFood,deleteFood, getFoods, type Food } from "@/lib/api/foods"
-
-import { GrFormNext } from "react-icons/gr";
+import { createFood, updateFood, deleteFood, getFoods } from "@/lib/api/foods"
+import type { Meal } from "@/types/meal"
+import { GrFormNext } from "react-icons/gr"
 
 export function FeaturedMeals() {
-  const [meals, setMeals] = useState<Food[]>([])
+  const [meals, setMeals] = useState<Meal[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
-  const [editingMeal, setEditingMeal] = useState<Food | null>(null)
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
   const [deletingMealId, setDeletingMealId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -32,11 +32,12 @@ export function FeaturedMeals() {
     }
   }
 
-  const handleAddMeal = async (data: Food) => {
+  const handleAddMeal = async (data: Meal) => {
     setIsLoading(true)
     try {
-      await createFood(data)
-      await loadMeals()
+      const newMeal = await createFood(data)
+      
+      setMeals((prev) => [newMeal, ...prev])
       setIsAddModalOpen(false)
     } catch (error) {
       console.error("Error adding meal:", error)
@@ -45,7 +46,7 @@ export function FeaturedMeals() {
     }
   }
 
-  const handleEdit = (meal: Food) => {
+  const handleEdit = (meal: Meal) => {
     setEditingMeal(meal)
     setIsEditModalOpen(true)
   }
@@ -60,7 +61,8 @@ export function FeaturedMeals() {
     setIsLoading(true)
     try {
       await deleteFood(deletingMealId)
-      await loadMeals()
+ 
+      setMeals((prev) => prev.filter((meal) => meal.id !== deletingMealId))
       setIsDeleteConfirmOpen(false)
       setDeletingMealId(null)
     } catch (error) {
@@ -70,12 +72,15 @@ export function FeaturedMeals() {
     }
   }
 
-  const handleUpdateMeal = async (data: Food) => {
+  const handleUpdateMeal = async (data: Meal) => {
     if (!editingMeal?.id) return
     setIsLoading(true)
     try {
-      await updateFood(editingMeal.id, data)
-      await loadMeals()
+      const updatedMeal = await updateFood(editingMeal.id, data)
+    
+      setMeals((prev) =>
+        prev.map((meal) => (meal.id === editingMeal.id ? updatedMeal : meal))
+      )
       setIsEditModalOpen(false)
       setEditingMeal(null)
     } catch (error) {
@@ -94,16 +99,21 @@ export function FeaturedMeals() {
               Featured Meals
             </h2>
           </div>
+
           {meals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 sm:py-16">
               <div className="empty-state-message text-center">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">No Meal available</h3>
-                <p className="text-gray-600 text-sm sm:text-base">Add a new meal to get started</p>
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                  No Meal available
+                </h3>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Add a new meal to get started
+                </p>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
-              {meals.map((meal: Food) => (
+              {meals.map((meal: Meal) => (
                 <div key={meal.id} className="food-meal-wrapper">
                   <MealCard
                     meal={meal}
@@ -124,12 +134,11 @@ export function FeaturedMeals() {
                 </span>
               </button>
             </div>
-
           )}
         </div>
       </section>
 
-    
+
       <FoodFormModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -139,7 +148,6 @@ export function FeaturedMeals() {
         isLoading={isLoading}
       />
 
-    
       <FoodFormModal
         isOpen={isEditModalOpen}
         onClose={() => {
@@ -153,20 +161,21 @@ export function FeaturedMeals() {
         isLoading={isLoading}
       />
 
-     
+    
       {isDeleteConfirmOpen && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl">
-            <h2 className="text-xl sm:text-2xl font-bold text-amber-500 mb-4 text-center">Delete Meal</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-amber-500 mb-4 text-center">
+              Delete Meal
+            </h2>
             <p className="text-gray-600 text-center mb-6 text-sm sm:text-base">
-              Are you sure you want to delete this meal? Actions cannot be reversed.
+              Are you sure you want to delete this meal? This action cannot be undone.
             </p>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={handleDeleteMeal}
                 disabled={isLoading}
                 className="flex-1 bg-amber-400 hover:bg-amber-500 disabled:bg-amber-300 text-gray-900 font-semibold py-2 sm:py-3 rounded-lg transition text-sm sm:text-base"
-                data-test-id="food-delete-confirm-btn"
               >
                 {isLoading ? "Deleting..." : "Yes"}
               </button>
@@ -187,4 +196,3 @@ export function FeaturedMeals() {
     </>
   )
 }
-

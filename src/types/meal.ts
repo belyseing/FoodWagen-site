@@ -4,11 +4,14 @@ export interface Meal {
   name: string;
   image?: string;               
   food_image?: string;         
-  price?: string;              
-  Price?: string;               
+  price?: number;                          
   rating?: number;
   food_rating?: string;         
-  restaurant?: string;         
+  restaurant?: {
+    name: string;
+    logo?: string;
+    status?: "Open" | "Closed";
+  };
   restaurantName?: string;      
   logo?: string;                
   restaurantLogo?: string;    
@@ -16,13 +19,16 @@ export interface Meal {
   status?: "Open" | "Closed";   
 }
 
-
 export interface MealFormData {
   name: string;
   image?: string;
-  price?: string;
+  price?: number;
   rating?: number;
-  restaurant?: string;
+  restaurant?: {
+    name: string;
+    logo?: string;
+    status?: "Open" | "Closed";
+  };
   restaurantLogo?: string;
   status?: "Open" | "Closed";
   description?: string;

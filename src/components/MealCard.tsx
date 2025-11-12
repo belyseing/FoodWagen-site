@@ -13,17 +13,12 @@ interface MealCardProps {
 
 const isValidImageUrl = (url?: string): boolean => {
   if (!url) return false
-  
 
   if (url.includes('/placeholder')) return false
   
   try {
     const parsed = new URL(url)
-    
-    
     const hasImageExtension = /\.(jpg|jpeg|png|webp|gif|svg|bmp|tiff)$/i.test(parsed.pathname)
-    
-
     const isFromImageHost = [
       'images.unsplash.com',
       'plus.unsplash.com',
@@ -41,7 +36,6 @@ const isValidImageUrl = (url?: string): boolean => {
     return false
   }
 }
-
 
 const createMealPlaceholder = () => 
   `data:image/svg+xml;base64,${btoa(`
@@ -67,6 +61,46 @@ export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
   const [logoImageError, setLogoImageError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
+  // ✅ Debug: Log the meal object to see what price fields exist
+  useEffect(() => {
+    console.log("🔍 Meal object:", meal)
+    console.log("💰 Price fields:", {
+      price: meal.price,
+      Price: meal.Price,
+      allKeys: Object.keys(meal)
+    })
+  }, [meal])
+
+  // ✅ FIXED: Better price handling that prevents NaN
+  const getDisplayPrice = () => {
+    // Check all possible price fields in order of priority
+    const priceValues = [
+      meal.price,    // First check 'price'
+      meal.Price,    // Then check 'Price'
+      0              // Default fallback
+    ]
+
+    for (const price of priceValues) {
+      if (price === undefined || price === null) continue
+      
+      // If it's already a valid number, return it
+      if (typeof price === 'number' && !isNaN(price)) {
+        return price
+      }
+      
+      // If it's a string, try to parse it
+      if (typeof price === 'string' && price.trim() !== '') {
+        const parsed = parseFloat(price)
+        if (!isNaN(parsed)) {
+          return parsed
+        }
+      }
+    }
+    
+    return 0 // Default fallback
+  }
+
+  const displayPrice = getDisplayPrice()
  
   const mealImageSrc = isValidImageUrl(meal.image) && !mealImageError 
     ? meal.image 
@@ -102,7 +136,7 @@ export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
         />
         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-orange-500 text-white px-2 sm:px-3 py-1 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1">
           <span className="font-bold"><LuTag /></span>
-          $ {meal.price}
+          $ {displayPrice.toFixed(2)} {/* ✅ Now uses the resolved price */}
         </div>
       </div>
 

@@ -1,15 +1,15 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 
 interface AddMealModalProps {
   isOpen: boolean
   onClose: () => void
+  onSubmit: (data: any) => void 
 }
 
-export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
+export function AddMealModal({ isOpen, onClose, onSubmit }: AddMealModalProps) { 
   const [formData, setFormData] = useState({
     foodName: "",
     foodRating: "",
@@ -38,7 +38,6 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-
     const newErrors: { [key: string]: string } = {}
     if (!formData.foodName.trim()) {
       newErrors.foodName = "Food name is required"
@@ -49,7 +48,20 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
       return
     }
 
-    console.log("Form submitted:", formData)
+const mealData = {
+  name: formData.foodName,
+  rating: parseFloat(formData.foodRating) || 0,
+  image: formData.foodImage,
+  price: parseFloat(formData.price) || 0, 
+  restaurant: {
+    name: formData.restaurantName,
+    logo: formData.restaurantLogo,
+    status: formData.restaurantStatus,
+  }
+}
+    console.log("Submitting meal data:", mealData) 
+    
+    onSubmit(mealData)
 
   
     setFormData({
@@ -60,7 +72,6 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
       restaurantLogo: "",
       restaurantStatus: "open",
     })
-    onClose()
   }
 
   if (!isOpen) return null
@@ -97,7 +108,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
             className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
 
-         
+          
           <input
             type="url"
             name="foodImage"
@@ -107,7 +118,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
             className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
 
-          
+          {/* Restaurant Name */}
           <input
             type="text"
             name="restaurantName"
@@ -117,7 +128,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
             className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
 
-         
+        
           <input
             type="url"
             name="restaurantLogo"
@@ -127,7 +138,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
             className="w-full px-4 py-3 bg-gray-100 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
 
-         
+          
           <select
             name="restaurantStatus"
             value={formData.restaurantStatus}

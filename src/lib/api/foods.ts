@@ -1,8 +1,7 @@
-// ✅ lib/api/foods.ts
+
+import type { Meal } from '@/types/meal'
+
 const API_BASE_URL = "https://6852821e0594059b23cdd834.mockapi.io"
-
-
-
 
 async function handleResponse(response: Response) {
   const data = await response.json().catch(() => null)
@@ -13,8 +12,7 @@ async function handleResponse(response: Response) {
   return data
 }
 
-
-export async function getFoods(searchParam?: string): Promise<Food[]> {
+export async function getFoods(searchParam?: string): Promise<Meal[]> {
   try {
     const url = searchParam
       ? `${API_BASE_URL}/Food?name=${searchParam}`
@@ -27,10 +25,13 @@ export async function getFoods(searchParam?: string): Promise<Food[]> {
   }
 }
 
-// ✅ Create a new food item
-export async function createFood(food: Food): Promise<Food> {
+export async function createFood(meal: Meal): Promise<Meal> {
   try {
-    const payload = { ...food, rating: Number(food.rating) }
+    const payload = { 
+      ...meal, 
+      rating: Number(meal.rating) || 0,
+      price: Number(meal.price) || 0 
+    }
     const response = await fetch(`${API_BASE_URL}/Food`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -43,11 +44,14 @@ export async function createFood(food: Food): Promise<Food> {
   }
 }
 
-
-export async function updateFood(id: string, food: Food): Promise<Food> {
+export async function updateFood(id: string, meal: Meal): Promise<Meal> {
   if (!id) throw new Error("Food ID is required for update")
   try {
-    const payload = { ...food, rating: Number(food.rating) }
+    const payload = { 
+      ...meal, 
+      rating: Number(meal.rating) || 0,
+      price: Number(meal.price) || 0 
+    }
     const response = await fetch(`${API_BASE_URL}/Food/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -59,7 +63,6 @@ export async function updateFood(id: string, food: Food): Promise<Food> {
     throw error
   }
 }
-
 
 export async function deleteFood(id: string): Promise<void> {
   if (!id) throw new Error("Food ID is required for deletion")
